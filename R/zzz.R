@@ -85,6 +85,16 @@ read_meta <- function(x) {
     # parse parameters
     longName <- sapply(parm, function(x) trimws(gsub('\\[.*|\\*.*|\\(.*', '', x[1])))
     shortName <- sapply(parm, function(x) regmatches(x[1], gregexpr("(?<=\\().*?(?=\\))", x[1], perl = TRUE))[[1]])
+    # catch parts of longNames that are in brackets
+    # keep last occurrence as shortName, assign all others to longName
+    if(any(sapply(shortName, length) != 1)){
+      iLong <- which(sapply(shortName, length) != 1)
+      for(i in 1:length(iLong)){
+        longName[[iLong[i]]] <- paste0(longName[[iLong[i]]], ' (', head(shortName[[iLong[i]]], length(shortName[[iLong[i]]])-1), ')')
+        shortName[[iLong[i]]] <- tail(shortName[[iLong[i]]], 1)
+        shortName <- unlist(shortName)
+      }
+    }
     Unit <- sapply(parm, function(x) regmatches(x[1], gregexpr("(?<=\\[).*?(?=\\])", x[1], perl = TRUE))[[1]])
     Unit <- sapply(Unit, function(x) ifelse(length(x) == 0, yes = NA, no = x))
     PI <- sapply(parm, function(x) x[grep('PI:', x)])
