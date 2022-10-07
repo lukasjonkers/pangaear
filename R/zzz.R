@@ -21,8 +21,15 @@ check <- function(x) {
 }
 
 read_csv <- function(x) {
-  lns <- readLines(x, n = 1000)
+  nlines <- 1000
+  lns <- readLines(x, n = nlines)
   ln_no <- grep("\\*/", lns)
+  # read in more lines if needed
+  while(length(ln_no) == 0){
+    nlines <- nlines + 1000
+    lns <- readLines(x, n = nlines)
+    ln_no <- grep("\\*/", lns)
+  }
   tmp <- utils::read.csv(x, header = FALSE, sep = "\t",
                   skip = ln_no + 1, stringsAsFactors = FALSE)
   nn <- strsplit(lns[ln_no + 1], "\t")[[1]]
