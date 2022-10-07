@@ -70,7 +70,11 @@ read_meta <- function(x) {
   for (i in seq_along(ext)) {
     sp <- strsplit(ext[[i]], "\\\t")
     nm <- tolower(gsub("\\s", "_", gsub(":|\\(|\\)", "", sp[[1]][1])))
-    if (length(sp) > 1) {
+    if(nm == "parameters"){
+      tmp <- unlist(c(sp[[1]][-1], sp[-1]))
+      tmp <- tmp[nzchar(tmp)]
+      dat <- list(tmp)
+    } else if (length(sp) > 1) {
       tmp <- unlist(c(sp[[1]][-1], sp[-1]))
       tmp <- tmp[nzchar(tmp)]
       dat <- paste0(tmp, collapse = "; ")
@@ -91,7 +95,7 @@ read_meta <- function(x) {
   # attempt to handle parameters
   if ("parameters" %in% names(ext2)) {
     parm <- ext2$parameters
-    parm <- strw(strsplit(parm, ";")[[1]])
+    # parm <- strw(strsplit(parm, ";")[[1]])
     # added space before * to handle ** in units
     parm <- lapply(parm, function(w) {
       strw(strsplit(w, " \\*")[[1]])
@@ -110,13 +114,13 @@ read_meta <- function(x) {
       }
     }
     Unit <- sapply(parm, function(x) regmatches(x[1], gregexpr("(?<=\\[).*?(?=\\])", x[1], perl = TRUE))[[1]])
-    Unit <- sapply(Unit, function(x) ifelse(length(x) == 0, yes = NA, no = x))
+    Unit <- sapply(Unit, function(x) ifelse(length(x) == 0, yes = NA_character_, no = x))
     PI <- sapply(parm, function(x) x[grep('PI:', x)])
-    PI <- sapply(PI, function(x) ifelse(length(x) == 0, yes = NA, no = gsub('PI: ', '', x)))
+    PI <- sapply(PI, function(x) ifelse(length(x) == 0, yes = NA_character_, no = gsub('PI: ', '', x)))
     Method_Device <- sapply(parm, function(x) x[grep('METHOD/DEVICE:', x)])
-    Method_Device <- sapply(Method_Device, function(x) ifelse(length(x) == 0, yes = NA, no = gsub('METHOD/DEVICE: ', '', x)))
+    Method_Device <- sapply(Method_Device, function(x) ifelse(length(x) == 0, yes = NA_character_, no = gsub('METHOD/DEVICE: ', '', x)))
     Comment <- sapply(parm, function(x) x[grep('COMMENT:', x)])
-    Comment <-   sapply(Comment, function(x) ifelse(length(x) == 0, yes = NA, no = gsub('COMMENT: ', '', x)))
+    Comment <-   sapply(Comment, function(x) ifelse(length(x) == 0, yes = NA_character_, no = gsub('COMMENT: ', '', x)))
     
     ext2$parameters <- tibble::tibble(longName,
                               shortName,
