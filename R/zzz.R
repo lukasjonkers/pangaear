@@ -111,7 +111,7 @@ read_meta <- function(x) {
       pat <- if(is.na(Unit[i])){
         paste0('\\(', shortName[i], '\\)')
       } else {
-        paste0('\\[', Unit[i], '\\].*')
+        '\\[.*'
       }
       longName[i] <- trimws(sub(pat, "", parm[[i]][1]))
     }
