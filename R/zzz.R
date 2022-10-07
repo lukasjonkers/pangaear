@@ -101,20 +101,20 @@ read_meta <- function(x) {
       strw(strsplit(w, " \\*")[[1]])
     })
     # parse parameters
-    longName <- sapply(parm, function(x) trimws(gsub('\\[.*|\\*.*|\\(.*', '', x[1])))
-    shortName <- sapply(parm, function(x) regmatches(x[1], gregexpr("(?<=\\().*?(?=\\))", x[1], perl = TRUE))[[1]])
-    # catch parts of longNames that are in brackets
-    # keep last occurrence as shortName, assign all others to longName
-    if(any(sapply(shortName, length) != 1)){
-      iLong <- which(sapply(shortName, length) != 1)
-      for(i in 1:length(iLong)){
-        longName[[iLong[i]]] <- paste0(longName[[iLong[i]]], ' (', head(shortName[[iLong[i]]], length(shortName[[iLong[i]]])-1), ')')
-        shortName[[iLong[i]]] <- tail(shortName[[iLong[i]]], 1)
-        shortName <- unlist(shortName)
-      }
-    }
+    # short name: last occurrence within brackets (allow for brackets in unit)
+    shortName <- sapply(parm, function(x) sub(".*(\\(((?:[^()]++|(?1))*)\\))$", "\\2", x[1], perl = TRUE))
     Unit <- sapply(parm, function(x) regmatches(x[1], gregexpr("(?<=\\[).*?(?=\\])", x[1], perl = TRUE))[[1]])
     Unit <- sapply(Unit, function(x) ifelse(length(x) == 0, yes = NA_character_, no = x))
+    # long name: if unit present, extract everything up to [; if not up to last occurrence of (
+    longName <- NA
+    for(i in 1:length(Unit)){
+      pat <- if(is.na(Unit[i])){
+        paste0('\\(', shortName[i], '\\)')
+      } else {
+        paste0('\\[', Unit[i], '\\].*')
+      }
+      longName[i] <- trimws(sub(pat, "", parm[[i]][1]))
+    }
     PI <- sapply(parm, function(x) x[grep('PI:', x)])
     PI <- sapply(PI, function(x) ifelse(length(x) == 0, yes = NA_character_, no = gsub('PI: ', '', x)))
     Method_Device <- sapply(parm, function(x) x[grep('METHOD/DEVICE:', x)])
