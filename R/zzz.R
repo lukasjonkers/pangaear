@@ -33,8 +33,15 @@ read_meta <- function(x) {
   # return NA if not a .txt file
   if (!grepl("\\.txt", x)) return(list())
 
-  lns <- readLines(x, n = 1000)
+  nlines <- 1000
+  lns <- readLines(x, n = nlines)
   ln_no <- grep("\\*/", lns)
+  # read in more lines if needed
+  while(length(ln_no) == 0){
+    nlines <- nlines + 1000
+    lns <- readLines(x, n = nlines)
+    ln_no <- grep("\\*/", lns)
+  }
   all_lns <- seq_len(ln_no)
   txt <- lns[all_lns[-c(1, length(all_lns))]]
   starts <- grep(":\\\t", txt)
